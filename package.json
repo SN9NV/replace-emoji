@@ -1,0 +1,21 @@
+{
+  "name": "emoji_replace",
+  "version": "1.0.0",
+  "description": "Replaces an emoji in a word with the description of the emoji",
+  "main": "emoji_replace.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "get": "node get_emoji_dictionary.js"
+  },
+  "keywords": [
+    "emoji",
+    "replace"
+  ],
+  "author": "Angus Dippenaar",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "request": "^2.79.0",
+    "require": "^2.4.20"
+  }
+}

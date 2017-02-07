@@ -3,5 +3,5 @@
 out
 gen
 *.html
-*.json
+emoji_dictionary.json
 node_modules
