@@ -1,0 +1,7 @@
+.idea
+*.iml
+out
+gen
+*.html
+*.json
+node_modules
