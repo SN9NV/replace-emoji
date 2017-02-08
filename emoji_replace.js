@@ -2,47 +2,39 @@
  * Created by angus on 07/02/17.
  */
 
-// import { dictionary } from 'emoji_dictionary';
 const fs = require('fs');
 
 const dictionary = JSON.parse(fs.readFileSync('emoji_dictionary.json'));
 
-/*module.exports = function replaceEmoji(str) {
-	return str.replace(/[\u{A9}-\u{1F6C5}]/ug, char => {
-		let code = Buffer(char).readUInt16BE();
-
-		console.log(code.toString(16));
-		let result = dictionary[code];
-		return result ? result : char;
-	});
-};*/
-
-module.exports = function replaceEmoji(str) {
-	let minMax = getMinMaxKeys(dictionary);
-
+module.exports = function replaceEmoji(string, fill=false) {
+	const str = new Buffer(string);
 	let newStr = '';
 
-	for (let i = 0; i < str.length; i++) {
-		let charCode = str.codePointAt(i);
+	for (let i = 0; i < str.length;) {
+		let localDict = dictionary;
+		let j = 0;
+		let char = str[i];
 
-		if (charCode >= minMax[0] && charCode <= minMax[1] && dictionary.hasOwnProperty(charCode)) {
-			let localDict = dictionary;
+		while (localDict.hasOwnProperty(char)) {
+			localDict = localDict[char];
+			char = str[i + ++j];
+		}
 
-			while (localDict.hasOwnProperty(charCode)) {
-				localDict = localDict[charCode];
-				charCode = str.codePointAt(i++);
+		if (localDict.name) {
+			if (fill) {
+				newStr += `${str.slice(i, i+j)}(${localDict.name})`;
+			} else {
+				newStr += `(${localDict.name})`;
 			}
-
-			newStr += localDict.name ? `(${localDict.name})` : str.slice(i, 1);
 		} else {
 			newStr += str.slice(i, i+1);
 		}
+
+		console.log(str.slice(i + j, i + j + 1));
+		if (str.slice(i + j, i + j + 3).readUInt32LE() === 0xFE0F) j += 3; // 0xFE0FF sometimes used as padding
+
+		i += j || 1;
 	}
 
 	return newStr;
 };
-
-function getMinMaxKeys(obj) {
-	let keys = Object.keys(obj).sort((a, b) => parseInt(a) - parseInt(b));
-	return [keys[0], keys.pop()];
-}
