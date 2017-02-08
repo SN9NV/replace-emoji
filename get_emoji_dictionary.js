@@ -6,10 +6,10 @@ const request = require('request');
 const cheerio = require('cheerio');
 const fs = require('fs');
 
-const getFromFile = true;
+const file = 'emoji-list.html';
 
-if (getFromFile) {
-	fs.readFile('emoji-list.html', null, (error, data) => {
+if (file) {
+	fs.readFile(file, null, (error, data) => {
 		if (!error) {
 			processPage(data);
 		} else {
@@ -37,22 +37,21 @@ function processPage(page) {
 		if (codes && name) {
 			codes = codes.split('_');
 			codes = codes.map(hex => parseInt(hex, 16));
+			codes = codes.reduce((acc, cur) => {
+
+			}, []);
 			console.log(`Code: ${codes}\tName: ${name}`);
 
-			if (codes.length > 1) {
-				let lastKeyIndex = codes.length - 1;
-
-				for (let i = 0; i < lastKeyIndex; i++) {
-
-				}
-			} else {
-				dictionary[codes] = {
-					name: name,
-					keys: false
-				};
-			}
+			assignNested(dictionary, codes, { name: name });
 		}
 	});
 
 	fs.writeFileSync('emoji_dictionary.json', JSON.stringify(dictionary, null, 2));
+}
+
+function assignNested(base, keys, value) {
+	const lastKey = keys.pop();
+	const lastObj = keys.reduce((obj, key) => obj[key] = obj[key] || {}, base);
+
+	lastObj[lastKey] = value;
 }
