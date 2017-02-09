@@ -36,33 +36,34 @@ function processPage(page) {
 
 		if (codes && name) {
 			const codesCopy = codes;
-			if (/U\+FE0F/i.test(codes)) {
-				codes = rip(codes, /[Uu]\+FE0F /i);
+			// if (/U\+FE0F/i.test(codes)) {
+				codes = rip(codes, /U\+FE0F /ig);
 				codes = codes.split(' ');
-				codes = codes.map(code => convertCharStr2UTF8(convertUnicode2Char(code))/*.replace(/ /g, '')*/.split(' '));
-				codes = codes.reduce((a, b) => a.concat(b));
-				codes = codes.map(code => parseInt(code, 16));
-				// codes = codes.join('');
-				console.log(`Code: ${codes}\tName: ${name}`);
-
-				// dictionary[codes] = name;
-				assignNested(dictionary, codes, { name: name });
-			}
+				dictionary = unicode2dictionary(codes, name, dictionary);
+			// }
 
 			codes = codesCopy;
-			codes = codes.split(' ');
-			codes = codes.map(code => convertCharStr2UTF8(convertUnicode2Char(code))/*.replace(/ /g, '')*/.split(' '));
-			codes = codes.reduce((a, b) => a.concat(b));
-			codes = codes.map(code => parseInt(code, 16));
-			// codes = codes.join('');
-			console.log(`Code: ${codes}\tName: ${name}`);
-
-			// dictionary[codes] = name;
-			assignNested(dictionary, codes, { name: name });
+			dictionary = unicode2dictionary(codes, name, dictionary);
 		}
 	});
 
 	fs.writeFileSync('emoji_dictionary.json', JSON.stringify(dictionary, null, 2));
+}
+
+function unicode2dictionary(codes, name, dictionary) {
+	if (typeof codes === 'object') {
+		codes = codes.map(code => convertCharStr2UTF8(convertUnicode2Char(code)).split(' '));
+		codes = codes.reduce((a, b) => a.concat(b));
+	} else {
+		codes = convertCharStr2UTF8(convertUnicode2Char(codes)).split(' ');
+	}
+
+	codes = codes.map(code => parseInt(code, 16));
+	console.log(`Code: ${codes}\tName: ${name}`);
+
+	assignNested(dictionary, codes, { name: name });
+
+	return dictionary;
 }
 
 function rip(string, regex) {
@@ -81,13 +82,9 @@ function convertUnicode2Char(str) {
 	// str: string, the input
 
 	// first convert the 6 digit escapes to characters
-	str = str.replace(/[Uu]\+10([A-Fa-f0-9]{4})/g, function(matchstr, parens) {
-		return hex2char('10' + parens);
-	});
+	str = str.replace(/[Uu]\+10([A-Fa-f0-9]{4})/g, (matchstr, parens) => hex2char('10' + parens));
 	// next convert up to 5 digit escapes to characters
-	str = str.replace(/[Uu]\+([A-Fa-f0-9]{1,5})/g, function(matchstr, parens) {
-		return hex2char(parens);
-	});
+	str = str.replace(/[Uu]\+([A-Fa-f0-9]{1,5})/g, (matchstr, parens) => hex2char(parens));
 	return str;
 }
 
@@ -102,8 +99,6 @@ function hex2char(hex) {
 	} else if (n <= 0x10FFFF) {
 		n -= 0x10000;
 		result += String.fromCharCode(0xD800 | (n >> 10)) + String.fromCharCode(0xDC00 | (n & 0x3FF));
-	} else {
-		result += 'hex2Char error: Code point out of range: ' + dec2hex(n);
 	}
 	return result;
 }
@@ -114,7 +109,6 @@ function convertCharStr2UTF8(str) {
 	let highsurrogate = 0;
 	let suppCP;
 	// decimal code point value for a supp char
-	let n = 0;
 	let outputString = '';
 	for (let i = 0; i < str.length; i++) {
 		let cc = str.charCodeAt(i);

@@ -5,7 +5,8 @@
   "main": "emoji_replace.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "get": "node get_emoji_dictionary.js"
+    "get": "node get_emoji_dictionary.js",
+    "build": "babel --no-comments --presets es2015 --out-file emoji_replace_es2015.js emoji_replace.js"
   },
   "keywords": [
     "emoji",
@@ -17,5 +18,8 @@
     "cheerio": "^0.22.0",
     "request": "^2.79.0",
     "require": "^2.4.20"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.22.0"
   }
 }
