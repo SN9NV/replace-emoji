@@ -35,15 +35,11 @@ function processPage(page) {
 		let name = $(element).find('td.name').text();
 
 		if (codes && name) {
-			const codesCopy = codes;
-			// if (/U\+FE0F/i.test(codes)) {
+				dictionary = unicode2dictionary(codes.split(' '), name, dictionary);
+
 				codes = rip(codes, /U\+FE0F /ig);
 				codes = codes.split(' ');
 				dictionary = unicode2dictionary(codes, name, dictionary);
-			// }
-
-			codes = codesCopy;
-			dictionary = unicode2dictionary(codes, name, dictionary);
 		}
 	});
 
@@ -51,14 +47,28 @@ function processPage(page) {
 }
 
 function unicode2dictionary(codes, name, dictionary) {
-	if (typeof codes === 'object') {
+	/*if (typeof codes === 'object') {
 		codes = codes.map(code => convertCharStr2UTF8(convertUnicode2Char(code)).split(' '));
 		codes = codes.reduce((a, b) => a.concat(b));
 	} else {
 		codes = convertCharStr2UTF8(convertUnicode2Char(codes)).split(' ');
-	}
+	}*/
 
-	codes = codes.map(code => parseInt(code, 16));
+	if (typeof codes === 'object') {
+	 	codes = codes.map(code => {
+	 		let chars = [];
+	 		let char = convertUnicode2Char(code);
+	 		for (let index = 0; index < char.length; index++) {
+	 			chars.push(char.charCodeAt(index));
+			}
+	 		return chars;
+		});
+	 	codes = codes.reduce((a, b) => a.concat(b));
+	 } else {
+	 	codes = [convertUnicode2Char(codes).charCodeAt(0)];
+	 }
+
+	// codes = codes.map(code => parseInt(code, 16));
 	console.log(`Code: ${codes}\tName: ${name}`);
 
 	assignNested(dictionary, codes, { name: name });
