@@ -14,9 +14,15 @@ if (file) {
 			processPage(data);
 		} else {
 			console.log(`Error: ${error}`);
+			console.log('Trying to download the page');
+			downloadPage();
 		}
 	});
 } else {
+	downloadPage();
+}
+
+function downloadPage() {
 	request('http://unicode.org/emoji/charts/emoji-list.html', (error, response, body) => {
 		if (!error && response.statusCode == 200) {
 			processPage(body);
